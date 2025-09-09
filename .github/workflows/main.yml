@@ -22,15 +22,7 @@ jobs:
           echo "Running: bash -n ./backup.sh"
           bash -n ./backup.sh
 
-      - name: ShellCheck (fail on any output)
+      - name: Run ShellCheck (with -x)
         run: |
           echo "Running ShellCheck..."
-          # Capture ShellCheck output (some systems may return 0 for warnings)
-          out=$(shellcheck ./backup.sh 2>&1 || true)
-          if [ -n "$out" ]; then
-            echo "ShellCheck found issues:"
-            echo "$out"
-            exit 1
-          else
-            echo "ShellCheck: no issues"
-          fi
+          shellcheck -x ./backup.sh
