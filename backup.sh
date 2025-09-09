@@ -1,3 +1,4 @@
+#HopeFORGOOD
 #!/bin/bash
 set -euo pipefail
 # Auto-Backup Script
