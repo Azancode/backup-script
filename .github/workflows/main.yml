@@ -1,0 +1,36 @@
+name: CI — Bash syntax & ShellCheck
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Bash syntax check (bash -n)
+        run: |
+          echo "Running: bash -n ./backup.sh"
+          bash -n ./backup.sh
+
+      - name: ShellCheck (fail on any output)
+        run: |
+          echo "Running ShellCheck..."
+          # Capture ShellCheck output (some systems may return 0 for warnings)
+          out=$(shellcheck ./backup.sh 2>&1 || true)
+          if [ -n "$out" ]; then
+            echo "ShellCheck found issues:"
+            echo "$out"
+            exit 1
+          else
+            echo "ShellCheck: no issues"
+          fi
