@@ -21,6 +21,9 @@ jobs:
         run: |
           echo "Running: bash -n ./backup.sh.sh"
           bash -n ./backup.sh
+      - name: Run ShellCheck
+        run: shellcheck -x **/*.sh
+
 
       - name: ShellCheck (fail on any output)
         run: |
