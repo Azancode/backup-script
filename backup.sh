@@ -5,7 +5,7 @@ set -euo pipefail
 set -e
 
 # Load config
-source "$(dirname "$0")/../config.conf"
+source "$(dirname "$0")/config.conf"
 
 # Timestamp
 DATE=$(date +'%Y-%m-%d_%H-%M-%S')
