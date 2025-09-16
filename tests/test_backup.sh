@@ -1,37 +1,52 @@
 #!/bin/bash
 set -euo pipefail
 
-# Where backup.sh should put files
-TEST_BACKUP_DIR="./test_backup"
+echo "🧪 Running backup.sh test..."
 
-# Clean up before running test
-rm -rf "$TEST_BACKUP_DIR"
+# --- Setup ---
+TEST_DIR="./test_env"
+TEST_DATA="$TEST_DIR/data"
+TEST_BACKUP="$TEST_DIR/backups"
+mkdir -p "$TEST_DATA" "$TEST_BACKUP"
 
-echo "🧪 Running real test for backup.sh..."
+# Create dummy config.conf
+cat > "$TEST_DIR/config.conf" <<EOF
+BACKUP_DIR="$TEST_BACKUP"
+BACKUP_PATHS=("$TEST_DATA")
+EOF
 
-# Create a dummy file to back up
-mkdir -p ./test_data
-echo "hello world" > ./test_data/hello.txt
+# Create dummy file to back up
+echo "hello world" > "$TEST_DATA/hello.txt"
 
-# Run your backup script (modify if it expects args)
-bash ./backup.sh ./test_data "$TEST_BACKUP_DIR"
+# --- Mock rclone ---
+# Replace 'rclone' with echo so no real upload happens
+PATH="./tests/mocks:\$PATH"
 
-# Check if the backup folder was created
-if [ ! -d "$TEST_BACKUP_DIR" ]; then
-  echo "❌ Backup directory was not created!"
-  exit 1
+mkdir -p ./tests/mocks
+cat > ./tests/mocks/rclone <<'EOF'
+#!/bin/bash
+echo "[MOCK] rclone copy $@"
+EOF
+chmod +x ./tests/mocks/rclone
+
+# --- Run script ---
+bash ./backup.sh "$TEST_DIR/config.conf"
+
+# --- Assertions ---
+# 1. Backup file exists
+if [ ! -f "$TEST_BACKUP"/backup_*.tar.gz ]; then
+    echo "❌ Backup file was not created!"
+    exit 1
 fi
 
-# Check if the file was copied
-if [ ! -f "$TEST_BACKUP_DIR/hello.txt" ]; then
-  echo "❌ File was not backed up!"
-  exit 1
-fi
+# 2. Extract and check contents
+TMP_EXTRACT="$TEST_DIR/extracted"
+mkdir -p "$TMP_EXTRACT"
+tar -xzf "$TEST_BACKUP"/backup_*.tar.gz -C "$TMP_EXTRACT"
 
-# Check file contents
-if ! grep -q "hello world" "$TEST_BACKUP_DIR/hello.txt"; then
-  echo "❌ File contents don’t match!"
-  exit 1
+if ! grep -q "hello world" "$TMP_EXTRACT/$TEST_DATA/hello.txt"; then
+    echo "❌ Backup file contents are wrong!"
+    exit 1
 fi
 
 echo "✅ Backup test passed successfully!"
