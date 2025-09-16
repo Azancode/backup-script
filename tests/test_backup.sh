@@ -19,7 +19,6 @@ EOF
 echo "hello world" > "$TEST_DATA/hello.txt"
 
 # --- Mock rclone ---
-# Replace 'rclone' with echo so no real upload happens
 PATH="./tests/mocks:\$PATH"
 
 mkdir -p ./tests/mocks
@@ -44,7 +43,7 @@ TMP_EXTRACT="$TEST_DIR/extracted"
 mkdir -p "$TMP_EXTRACT"
 tar -xzf "$TEST_BACKUP"/backup_*.tar.gz -C "$TMP_EXTRACT"
 
-if ! grep -q "hello world" "$TMP_EXTRACT/$TEST_DATA/hello.txt"; then
+if ! grep -q "hello world" "$TMP_EXTRACT/hello.txt"; then
     echo "❌ Backup file contents are wrong!"
     exit 1
 fi
