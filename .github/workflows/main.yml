@@ -21,6 +21,10 @@ jobs:
 
       - name: Install ShellCheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Show repo structure
+        run: |
+          echo "Listing files so we know where config.conf is:"
+          ls -R
 
       - name: Bash syntax check (bash -n)
         run: |
