@@ -13,6 +13,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+      - name: Install core utilities
+        run: sudo apt-get update && sudo apt-get install -y coreutils tar grep
+
+      - name: Run tests
+        run: bash tests/test_backup.sh
 
       - name: Install ShellCheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
